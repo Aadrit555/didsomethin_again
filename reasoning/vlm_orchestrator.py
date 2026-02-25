@@ -24,31 +24,36 @@ class VLMOrchestrator:
         grounding_results = self.kg.search_graph(query)
 
         if not grounding_results and not context_frames:
-            return "No relevant segments were found in the video for this question."
+            return "I couldn't find any segment in the video that clearly matches this question."
 
-        parts = []
-
+        # If we have KG nodes, treat their labels as the primary explanation.
         if grounding_results:
-            parts.append("From the video graph I found these relevant segments:")
-            for node in grounding_results[:5]:
+            top_nodes = grounding_results[:3]
+            sentences = []
+            for node in top_nodes:
                 label = node.get("label", "")
                 start = node.get("start_time", 0.0)
                 end = node.get("end_time", 0.0)
-                parts.append(f"- {label} (from {start:.2f}s to {end:.2f}s)")
+                if label:
+                    sentences.append(
+                        f"Between {start:.2f}s and {end:.2f}s the video contains: {label}"
+                    )
 
+            if sentences:
+                return " ".join(sentences)
+
+        # Fallback: only have timestamps from retrieved frames.
         if context_frames:
             unique_ts = sorted({frame["timestamp"] for frame in context_frames})
             ts_str = ", ".join(f"{t:.2f}s" for t in unique_ts[:8])
-            parts.append(
-                f"I also used frames around these times as evidence: {ts_str}."
+            return (
+                "I retrieved several relevant moments in the video around these times: "
+                f"{ts_str}. However, without a vision model I can't reliably describe "
+                "the exact visual content at those timestamps."
             )
 
-        parts.append(
-            "Given only this structural information (without a vision model), "
-            "this is the most grounded description I can provide."
-        )
-
-        return "\n".join(parts)
+        # Absolute fallback – should rarely be hit.
+        return "I was not able to derive a meaningful answer from the stored video structure."
 
 
 if __name__ == "__main__":
