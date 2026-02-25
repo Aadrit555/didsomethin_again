@@ -2,7 +2,7 @@
     "nodes": [
         {
             "id": "node_1",
-            "label": "Error communicating with VLM: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate",
+            "label": "Segment 1: Visual sequence containing 2 frames starting at 0.20s. (high_motion)",
             "start_time": 0.2,
             "end_time": 8.2,
             "representative_frame": "C:\\Users\\Aadrit\\OneDrive\\Desktop\\tempo\\extracted_frames\\00_08_199_246.jpg"
